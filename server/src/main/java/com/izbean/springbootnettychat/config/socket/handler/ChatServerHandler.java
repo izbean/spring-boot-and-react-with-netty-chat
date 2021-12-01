@@ -20,12 +20,6 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
     private final static NicknameProvider nicknameProvider = new NicknameProvider();
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        log.debug("여기 2?");
-        helo(ctx.channel());
-    }
-
-    @Override
     public void channelInactive(final ChannelHandlerContext ctx) {
         channels.remove(ctx.channel());
         channels.writeAndFlush(message(Command.LEFT, nickname(ctx)));
@@ -53,10 +47,10 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
                     .addListener(ChannelFutureListener.CLOSE);
         } else {
             bindNickname(channel, nickname);
-            channel.writeAndFlush(message(Command.HELO, nickname));
             channels.forEach(c -> channel.write(message(Command.HAVE, nickname(c))));
             channels.writeAndFlush(message(Command.JOIN, nickname));
             channels.add(channel);
+            channel.writeAndFlush(message(Command.HELO, nickname));
         }
     }
 
@@ -90,9 +84,9 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
         if (!newNick.equals(prev) && nicknameProvider.available(newNick)) {
             nicknameProvider.release(prev).reserve(newNick);
             bindNickname(ctx.channel(), newNick);
-            channels.write(message(Command.NICK, prev, newNick));
+            channels.writeAndFlush(message(Command.NICK, prev, newNick));
         } else {
-            ctx.write(message(Command.ERROR, null, "couldn't change"));
+            ctx.writeAndFlush(message(Command.ERROR, null, "couldn't change"));
         }
     }
 
@@ -101,6 +95,9 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
         log.debug("channelRead0 Payload: {}", payload);
 
         switch (payload.getCommand()) {
+            case HELO:
+                helo(ctx.channel());
+                break;
             case SEND:
                 channels.writeAndFlush(message(Command.FROM, nickname(ctx), payload.getBody()));
                 break;
