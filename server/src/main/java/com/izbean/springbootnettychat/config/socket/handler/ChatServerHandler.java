@@ -15,8 +15,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @ChannelHandler.Sharable
 public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
+
     private static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    static final AttributeKey<String> nickAttr = AttributeKey.newInstance("nickname");
+
+    private static final AttributeKey<String> nickAttr = AttributeKey.newInstance("nickname");
+
     private final static NicknameProvider nicknameProvider = new NicknameProvider();
 
     @Override
@@ -25,6 +28,30 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
         channels.writeAndFlush(message(Command.LEFT, nickname(ctx)));
         nicknameProvider.release(nickname(ctx));
     }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, Payload payload) throws Exception {
+        log.debug("channelRead0 Payload: {}", payload);
+
+        switch (payload.getCommand()) {
+            case HELO:
+                hello(ctx.channel());
+                break;
+            case SEND:
+                channels.writeAndFlush(message(Command.FROM, nickname(ctx), payload.getBody()));
+                break;
+            case QUIT:
+                ctx.writeAndFlush(message(Command.BYE, payload.getNickname()));
+                ctx.close();
+                break;
+            case NICK:
+                changeNickname(ctx, payload);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Unsupported command. [%s]", payload.getCommand()));
+        }
+    }
+
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         ctx.flush();
@@ -39,7 +66,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
         }
     }
 
-    private void helo(Channel channel) {
+    private void hello(Channel channel) {
         if (nickname(channel) != null) return;
         String nickname = nicknameProvider.reserve();
         if (nickname == null) {
@@ -90,27 +117,4 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
         }
     }
 
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Payload payload) throws Exception {
-        log.debug("channelRead0 Payload: {}", payload);
-
-        switch (payload.getCommand()) {
-            case HELO:
-                helo(ctx.channel());
-                break;
-            case SEND:
-                channels.writeAndFlush(message(Command.FROM, nickname(ctx), payload.getBody()));
-                break;
-            case QUIT:
-                ctx.writeAndFlush(message(Command.BYE, payload.getNickname()));
-                ctx.close();
-                break;
-            case NICK:
-                changeNickname(ctx, payload);
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("Unsupported command. [%s]", payload.getCommand()));
-        }
-
-    }
 }

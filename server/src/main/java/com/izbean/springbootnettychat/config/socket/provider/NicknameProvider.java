@@ -5,7 +5,9 @@ import java.util.*;
 public class NicknameProvider {
 
     private final Queue<String> pool;
+
     private final Set<String> preset;
+
     private final Set<String> occupied = new HashSet<>();
 
     public NicknameProvider() {

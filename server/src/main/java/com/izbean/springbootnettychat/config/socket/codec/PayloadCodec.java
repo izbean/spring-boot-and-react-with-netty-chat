@@ -26,4 +26,5 @@ public class PayloadCodec extends MessageToMessageCodec<TextWebSocketFrame, Payl
     protected void decode(ChannelHandlerContext ctx, TextWebSocketFrame frame, List<Object> out) throws Exception {
         out.add(Payload.parse(frame.content().toString(Charset.defaultCharset())));
     }
+
 }

@@ -49,4 +49,5 @@ public class WebSocketInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(chatServerHandler);
 
     }
+
 }

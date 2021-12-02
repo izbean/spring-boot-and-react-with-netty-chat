@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MapperUtils {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
     public static <T> T readValueOrThrow(String value, Class<T> cls) {
         try {
             return objectMapper.readValue(value, cls);

@@ -16,4 +16,5 @@ public class ApplicationStartupConfig implements ApplicationListener<Application
     public void onApplicationEvent(ApplicationReadyEvent event) {
         webSocketServer.run();
     }
+
 }
