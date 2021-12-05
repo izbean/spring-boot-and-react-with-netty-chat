@@ -2,7 +2,7 @@ package com.izbean.springbootnettychat.config.socket.payload;
 
 public enum Command {
 
-    HELO,
+    HELLO,
     JOIN,
     HAVE,
     NICK,
@@ -10,8 +10,8 @@ public enum Command {
     SEND,
     FROM,
 
-    BYE,
     LEFT,
+    BYE,
     QUIT,
 
     ERROR,

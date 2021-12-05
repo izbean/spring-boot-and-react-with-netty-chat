@@ -1,75 +1,46 @@
-import React, {useContext, useState} from 'react';
-import { WebSocketContext } from '../websocket/WebSocketProvider';
 import { Container, Row, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
+import { useSelector } from 'react-redux';
+import { RootState } from '../reducer/reducers';
+import { ChatMessage, ChatMessageCommand } from '../reducer/ChatMessage';
 
-interface ChatMessage {
-    command: string,
-    nickname: string,
-    body: string
-}
+import './ChatRoom.css';
 
 const ChatRoom = () => {
-    const ws = useContext(WebSocketContext);
-    const [items, setItems] = useState<ChatMessage[]>([]);
-    const [attendees, setAttendees] = useState<ChatMessage[]>([]);
-
-    const addItem = (item: ChatMessage) => {
-        setItems([
-            ...items,
-            item
-        ]);
-    };
-
-    const addAttendies = (attendee: ChatMessage) => {
-        setAttendees([
-            ...attendees,
-            attendee
-        ]);
-    }
-
-    ws.current.onmessage = (evt: MessageEvent) => {
-        const data = JSON.parse(evt.data);
-        console.log(data);
-        switch (data.command) {
-            case "JOIN":
-            case "HAVE":
-                addAttendies(data);
-                break;
-            case "FROM":
-                addItem(data);
-
-                let chatBody = document.getElementById('chats');
-
-                if (chatBody) chatBody.scrollTop = chatBody?.scrollHeight;
-
-                break;
-            case "HELO":
-                addAttendies(data);
-                break;
-        }
-    }
+    const items = useSelector((state: RootState) => state.chatReducer.chats);
+    const attendees = useSelector((state: RootState) => state.chatReducer.attendees);
+    const nickname = useSelector((state: RootState) => state.chatReducer.nickname);
 
     return (
         <Container>
             <Row>
-                <Col id="chats" style={{height: "90vh", overflowY: "scroll"}} sm={8}>
-                    {
-                        items.map((message) => {
-                            return (
-                                <div style={{textAlign: "left"}}><cite style={{marginRight: "10px"}}>{message.nickname}</cite>{message.body}</div>
-                            )
+                <Col className="view" sm={8}>
+                    { 
+                        items && items.map((message: ChatMessage) => {
+                            switch (message.command) {
+                                case ChatMessageCommand.HELLO:
+                                    return <div className="message-info">{message.nickname}님 어서오세요!</div>;
+                                case ChatMessageCommand.JOIN:
+                                    return <div className="message-info">{message.nickname}님이 입장했어요!</div>;
+                                case ChatMessageCommand.LEFT:
+                                    return <div className="message-info">{message.nickname}님이 떠나셨어요.</div>;
+                                case ChatMessageCommand.NICK:
+                                    return <div className="message-info">{message.nickname}님이 닉네임을 변경했어요! [{message.body}]</div>;
+                                case ChatMessageCommand.FROM:
+                                    return <div className="message"><cite>{message.nickname}</cite>{message.body}</div>;
+                            }
                         })
                     }
                 </Col>
-                <Col style={{height: "30vh", overflowY: "scroll"}} sm={4}>
-                    <div style={{textAlign: "center", borderBottom: "1px black solid"}}>참여자 목록</div>
-                    {
-                        attendees.map((attendee) => {
+                <Col className="view" sm={4}>
+                    <div className="attendee title">참여자 목록</div>
+                    {   
+                        attendees && attendees.map((attendee: string) => {
                             return (
-                                <div>{attendee.nickname}&nbsp;
-                                     {attendee.command == "HELO" ? <FontAwesomeIcon icon={faUser} /> : null}
+                                <div>
+                                     {attendee}&nbsp;
+                                     {attendee == nickname && <FontAwesomeIcon icon={faUser}/>}
                                 </div>
                                 
                             )

@@ -34,7 +34,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
         log.debug("channelRead0 Payload: {}", payload);
 
         switch (payload.getCommand()) {
-            case HELO:
+            case HELLO:
                 hello(ctx.channel());
                 break;
             case SEND:
@@ -77,7 +77,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
             channels.forEach(c -> channel.write(message(Command.HAVE, nickname(c))));
             channels.writeAndFlush(message(Command.JOIN, nickname));
             channels.add(channel);
-            channel.writeAndFlush(message(Command.HELO, nickname));
+            channel.writeAndFlush(message(Command.HELLO, nickname));
         }
     }
 

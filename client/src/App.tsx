@@ -3,15 +3,15 @@ import WebSocketProvider from './websocket/WebSocketProvider';
 import ChatRoom from './components/ChatRoom';
 import TextInputBox from './components/TextInputBox';
 
-const App =  () => {
+const App = () => {
   return (
-    <div className="App">
-      <WebSocketProvider>
-        <ChatRoom/>
-        <br/>
-        <TextInputBox/>
-      </WebSocketProvider>
-    </div>
+      <div className="App"> 
+        <WebSocketProvider>
+          <ChatRoom/>
+          <br/>
+          <TextInputBox/>
+        </WebSocketProvider>
+      </div>
   );
 }
 

@@ -1,0 +1,21 @@
+.message-info {
+    text-align: center;
+}
+
+.message {
+    text-align: left;
+}
+
+.message cite {
+    margin-right: 10px;
+}
+
+.view {
+    height: 80vh;
+    overflow-y: scroll;
+}
+
+.view .attendee.title {
+    text-align: center;
+    border-bottom: 1px solid black;
+}
