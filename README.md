@@ -3,7 +3,7 @@
 기초 모델은 간단한 현 상태로 유지하고, 점차 기능과 테스트 코드를 붙여가며 개선 할 계획입니다.
 
 ## 사용 기술 및 환경
-- Server: Spring boot
+- Server: Spring boot + Netty
 - Client: React + Redux + TypeScript
 
 ## Preview
