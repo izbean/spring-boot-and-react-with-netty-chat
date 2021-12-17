@@ -15,14 +15,14 @@ public class Payload implements Serializable {
 
     private String nickname;
 
-    private String body;
+    private Object body;
 
     public static Payload parse(String payload) {
         return MapperUtils.readValueOrThrow(payload, Payload.class);
     }
 
     @Builder
-    public Payload(Command command, String nickname, String body) {
+    public Payload(Command command, String nickname, Object body) {
         this.command = command;
         this.nickname = nickname;
         this.body = body;

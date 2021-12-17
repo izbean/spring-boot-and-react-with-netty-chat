@@ -16,4 +16,6 @@ public enum Command {
 
     ERROR,
 
+    CREATE_ROOM,
+
 }

@@ -3,8 +3,6 @@ package com.izbean.springbootnettychat.config.socket.initialize;
 import com.izbean.springbootnettychat.config.socket.codec.PayloadCodec;
 import com.izbean.springbootnettychat.config.socket.handler.ChatServerHandler;
 import com.izbean.springbootnettychat.config.socket.handler.WebSocketServerHandler;
-import com.izbean.springbootnettychat.config.socket.payload.Payload;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;

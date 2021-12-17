@@ -1,16 +1,20 @@
 package com.izbean.springbootnettychat.config.socket.handler;
 
 import com.izbean.springbootnettychat.config.socket.payload.Command;
+import com.izbean.springbootnettychat.config.socket.payload.Message;
 import com.izbean.springbootnettychat.config.socket.payload.Payload;
 import com.izbean.springbootnettychat.config.socket.provider.NicknameProvider;
+import com.izbean.springbootnettychat.service.RoomService;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@RequiredArgsConstructor
 @Component
 @Slf4j
 @ChannelHandler.Sharable
@@ -21,6 +25,8 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
     private static final AttributeKey<String> nickAttr = AttributeKey.newInstance("nickname");
 
     private final static NicknameProvider nicknameProvider = new NicknameProvider();
+
+    private final RoomService roomService;
 
     @Override
     public void channelInactive(final ChannelHandlerContext ctx) {
@@ -47,6 +53,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
             case NICK:
                 changeNickname(ctx, payload);
                 break;
+
             default:
                 throw new IllegalArgumentException(String.format("Unsupported command. [%s]", payload.getCommand()));
         }
@@ -85,7 +92,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
         return message(command, nickname, null);
     }
 
-    private Payload message(Command command, String nickname, String body) {
+    private Payload message(Command command, String nickname, Object body) {
         return Payload.builder()
                 .command(command)
                 .nickname(nickname)
@@ -106,7 +113,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
     }
 
     private void changeNickname(ChannelHandlerContext ctx, Payload payload) {
-        String newNick = payload.getBody();
+        String newNick = ((Message) payload.getBody()).getMessage();
         String prev = nickname(ctx);
         if (!newNick.equals(prev) && nicknameProvider.available(newNick)) {
             nicknameProvider.release(prev).reserve(newNick);
