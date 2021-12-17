@@ -6,5 +6,17 @@
 - Server: Spring boot + Netty
 - Client: React + Redux + TypeScript
 
+## 점진적 기능 개선 및 추가
+| 단계 | 변경점 |
+| ------ | ------ |
+| [step1][step1] | 기본 채팅 기능 작성 |
+| [step2][step2] | ChatRoom 기능 추가[WIP] |
+
+
 ## Preview
 ![image](https://user-images.githubusercontent.com/59522103/144761338-3c705556-b3db-46f6-ac0b-4a2675247983.png)
+
+
+[//]: #
+  [step1]: <https://github.com/izbean/spring-boot-and-react-with-netty-chat/tree/step1>
+  [step2]: <https://github.com/izbean/spring-boot-and-react-with-netty-chat/tree/step2>
