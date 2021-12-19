@@ -9,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class JoinRoomDto implements Serializable {
+
     private static final long serialVersionUID = 4157810518336078346L;
 
     private String id;

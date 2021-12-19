@@ -15,4 +15,6 @@ public class RoomDto implements Serializable {
 
     private String name;
 
+    private Integer attendeeCount;
+
 }

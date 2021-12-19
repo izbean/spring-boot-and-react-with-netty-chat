@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { receive } from '../reducer/actions'
-import { ChatMessage, ChatMessageCommand } from '../reducer/ChatMessage';
+import { Payload, PayloadCommand } from '../reducer/ChatMessage';
 
 const WebSocketContext = React.createContext<any>(null);
 export { WebSocketContext };
@@ -15,14 +15,20 @@ const WebSocketProvider = ({children}: {children: React.ReactNode}) => {
     if (!ws.current) {
         ws.current = new WebSocket(webSocketUrl);
         ws.current.onopen = () => {
-            let sendMessage: ChatMessage = {
-                command: ChatMessageCommand.HELLO, 
-                nickname: null, 
+            let sendMessage: Payload = {
+                command: PayloadCommand.HELLO, 
                 body: null
             };
             
             ws.current?.send(JSON.stringify(sendMessage));
             console.log('connected to ' + webSocketUrl);
+
+            let sendMessage2: Payload = {
+                command: PayloadCommand.RELOAD_ROOM_LIST, 
+                body: null
+            };
+            
+            ws.current?.send(JSON.stringify(sendMessage2));
         }
         ws.current.onclose = error => {
             console.log('disconnect from ' + webSocketUrl);

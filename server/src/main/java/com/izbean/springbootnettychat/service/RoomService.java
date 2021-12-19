@@ -23,12 +23,24 @@ public class RoomService {
                 .collect(Collectors.toList());
     }
 
+    public RoomDto getRoom(String roomId) {
+        return Room.of(roomRepository.getById(roomId));
+    }
+
+    public void sendMessageForRoom(ChannelHandlerContext ctx, String roomId, String message) {
+        roomRepository.sendMessageForRoom(ctx, roomId, message);
+    }
+
     public JoinRoomDto joinRoom(ChannelHandlerContext ctx, String roomId) {
         return Room.ofJoin(roomRepository.joinRoom(ctx, roomId));
     }
 
-    public String createRoom(String name) {
-        return roomRepository.save(Room.builder().name(name).build()).getId();
+    public RoomDto createRoom(String name) {
+        Room newRoom = Room.builder()
+                .name(name)
+                .build();
+
+        return Room.of(roomRepository.save(newRoom));
     }
 
 }

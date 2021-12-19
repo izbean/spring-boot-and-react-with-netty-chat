@@ -3,32 +3,34 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { useSelector } from 'react-redux';
 import { RootState } from '../reducer/reducers';
-import { ChatMessage, ChatMessageCommand } from '../reducer/ChatMessage';
+import { Payload, PayloadCommand, Message } from '../reducer/ChatMessage';
+import TextInputBox from './TextInputBox';
 
 import './ChatRoom.css';
 
 const ChatRoom = () => {
-    const items = useSelector((state: RootState) => state.chatReducer.chats);
-    const attendees = useSelector((state: RootState) => state.chatReducer.attendees);
-    const nickname = useSelector((state: RootState) => state.chatReducer.nickname);
+    const items = useSelector((state: RootState) => state.chatReducer?.chats);
+    const attendees = useSelector((state: RootState) => state.chatReducer?.attendees);
+    const nickname = useSelector((state: RootState) => state.chatReducer?.nickname);
 
     return (
         <Container>
             <Row>
                 <Col className="view" sm={8}>
                     { 
-                        items && items.map((message: ChatMessage) => {
-                            switch (message.command) {
-                                case ChatMessageCommand.HELLO:
+                        items && items.map((payload: Payload) => {
+                            let message = payload.body as Message;
+                            switch (payload.command) {
+                                case PayloadCommand.HELLO:
                                     return <div className="message-info">{message.nickname}님 어서오세요!</div>;
-                                case ChatMessageCommand.JOIN:
+                                case PayloadCommand.JOIN:
                                     return <div className="message-info">{message.nickname}님이 입장했어요!</div>;
-                                case ChatMessageCommand.LEFT:
+                                case PayloadCommand.LEFT:
                                     return <div className="message-info">{message.nickname}님이 떠나셨어요.</div>;
-                                case ChatMessageCommand.NICK:
-                                    return <div className="message-info">{message.nickname}님이 닉네임을 변경했어요! [{message.body}]</div>;
-                                case ChatMessageCommand.FROM:
-                                    return <div className="message"><cite>{message.nickname}</cite>{message.body}</div>;
+                                case PayloadCommand.NICK:
+                                    return <div className="message-info">{message.nickname}님이 닉네임을 변경했어요! [{message.message}]</div>;
+                                case PayloadCommand.FROM:
+                                    return <div className="message"><cite>{message.nickname}</cite>{message.message}</div>;
                             }
                         })
                     }
@@ -47,6 +49,9 @@ const ChatRoom = () => {
                         })
                     }
                 </Col>
+            </Row>
+            <Row>
+                <TextInputBox/>
             </Row>
         </Container>
     );

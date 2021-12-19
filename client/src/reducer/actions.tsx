@@ -1,8 +1,8 @@
-import { ChatMessage, ChatMessageCommand } from "./ChatMessage";
+import { Payload, PayloadCommand } from "./ChatMessage";
 
-export const receive = (payload: ChatMessage) => {
+export const receive = (payload: Payload) => {
     return {
         type: payload.command,
-        payload
+        body: payload.body
     }
 }

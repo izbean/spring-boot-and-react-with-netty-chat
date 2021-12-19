@@ -1,19 +1,20 @@
 package com.izbean.springbootnettychat.config.socket.payload;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.izbean.springbootnettychat.dto.RoomDto;
 import com.izbean.springbootnettychat.util.MapperUtils;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.mapper.Mapper;
 
 import java.io.Serializable;
 
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Data
+@Slf4j
 public class Payload implements Serializable {
 
     private Command command;
-
-    private String nickname;
 
     private Object body;
 
@@ -22,10 +23,14 @@ public class Payload implements Serializable {
     }
 
     @Builder
-    public Payload(Command command, String nickname, Object body) {
+    public Payload(Command command, Object body) {
         this.command = command;
-        this.nickname = nickname;
         this.body = body;
+    }
+
+    public static <T> T bodyOfClass(Payload payload, Class<T> cls) {
+        String body = MapperUtils.writeValueAsStringOrThrow(payload.getBody());
+        return MapperUtils.readValueOrThrow(body, cls);
     }
 
 }

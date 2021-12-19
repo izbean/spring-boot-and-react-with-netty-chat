@@ -3,10 +3,11 @@ import { WebSocketContext } from '../websocket/WebSocketProvider';
 import { Container, Row, Col, Button, InputGroup, FormControl } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { RootState } from '../reducer/reducers';
-import { ChatMessage, ChatMessageCommand } from '../reducer/ChatMessage';
+import { Payload, PayloadCommand, Message } from '../reducer/ChatMessage';
 
 const TextInputBox = () => {
     const [message, setMessage] = useState('');
+    const activeRoomId = useSelector((state: RootState) => state.chatReducer.activeRoomId);
     
     const ws = useContext(WebSocketContext);
 
@@ -24,10 +25,12 @@ const TextInputBox = () => {
     }
 
     const changeNickname = () => {
-        let sendMessage: ChatMessage = {
-            command: ChatMessageCommand.NICK, 
-            nickname: null, 
-            body: viewNickname
+        let sendMessage: Payload = {
+            command: PayloadCommand.NICK,
+            body: {
+                nickname: null,
+                message: viewNickname
+            }
         };
 
         ws.current.send(JSON.stringify(sendMessage));
@@ -43,10 +46,13 @@ const TextInputBox = () => {
     }
 
     const sendMessage = () => {
-        let sendMessage: ChatMessage = {
-            command: ChatMessageCommand.SEND, 
-            nickname: null, 
-            body: message
+        let sendMessage: Payload = {
+            command: PayloadCommand.SEND, 
+            body: {
+                roomId: activeRoomId,
+                nickname: null,
+                message: message
+            }
         };
 
         ws.current.send(JSON.stringify(sendMessage));
