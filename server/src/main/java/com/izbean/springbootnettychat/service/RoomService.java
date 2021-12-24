@@ -4,6 +4,7 @@ import com.izbean.springbootnettychat.dto.JoinRoomDto;
 import com.izbean.springbootnettychat.dto.RoomDto;
 import com.izbean.springbootnettychat.repository.Room;
 import com.izbean.springbootnettychat.repository.RoomRepository;
+import com.izbean.springbootnettychat.util.ChannelUtils;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,16 @@ public class RoomService {
         roomRepository.sendMessageForRoom(ctx, roomId, message);
     }
 
+    public void changeNickname(ChannelHandlerContext ctx, String prevNickname) {
+        roomRepository.changeNickname(ctx, prevNickname, ChannelUtils.getActiveRoomId(ctx));
+    }
+
     public JoinRoomDto joinRoom(ChannelHandlerContext ctx, String roomId) {
         return Room.ofJoin(roomRepository.joinRoom(ctx, roomId));
+    }
+
+    public void leftRoom(ChannelHandlerContext ctx, String roomId) {
+        roomRepository.leftRoom(ctx, roomId);
     }
 
     public RoomDto createRoom(String name) {

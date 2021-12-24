@@ -1,5 +1,6 @@
 package com.izbean.springbootnettychat.repository;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.springframework.stereotype.Repository;
 
@@ -12,8 +13,6 @@ public class RoomRepository {
 
     private final ConcurrentHashMap<String, Room> rooms = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<String, String>
-
     public List<Room> findAll() {
         return new ArrayList<>(rooms.values());
     }
@@ -23,14 +22,24 @@ public class RoomRepository {
     }
 
     public void sendMessageForRoom(ChannelHandlerContext ctx, String roomId, String message) {
-        Room room = rooms.get(roomId);
+        Room room = getById(roomId);
         room.send(ctx, message);
     }
 
     public Room joinRoom(ChannelHandlerContext ctx, String roomId) {
-        Room room = rooms.get(roomId);
+        Room room = getById(roomId);
         room.join(ctx);
         return room;
+    }
+
+    public void leftRoom(ChannelHandlerContext ctx, String roomId) {
+        Room room = getById(roomId);
+        room.left(ctx);
+    }
+
+    public void changeNickname(ChannelHandlerContext ctx, String prevNickname, String roomId) {
+        Room room = getById(roomId);
+        room.nick(ctx, prevNickname);
     }
 
     public Room save(Room room) {

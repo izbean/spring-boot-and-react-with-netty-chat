@@ -4,7 +4,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.FullHttpMessage;
 import io.netty.handler.codec.http.websocketx.*;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame frame) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame frame) {
         if (frame instanceof CloseWebSocketFrame) {
             ctx.channel().writeAndFlush(frame).addListener(ChannelFutureListener.CLOSE);
             return;

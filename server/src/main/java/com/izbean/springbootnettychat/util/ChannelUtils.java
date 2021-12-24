@@ -18,6 +18,14 @@ public class ChannelUtils {
         return channel.attr(nicknameAttributeKey).get();
     }
 
+    public static void setActiveRoomIdKey(ChannelHandlerContext ctx, String roomId) {
+        setActiveRoomIdKey(ctx.channel(), roomId);
+    }
+
+    public static void setActiveRoomIdKey(Channel channel, String roomId) {
+        channel.attr(activeRoomIdKey).set(roomId);
+    }
+
     public static String getActiveRoomId(ChannelHandlerContext ctx) {
         return getActiveRoomId(ctx.channel());
     }

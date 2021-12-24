@@ -22,6 +22,13 @@ public class Payload implements Serializable {
         return MapperUtils.readValueOrThrow(payload, Payload.class);
     }
 
+    public static Payload message(Command command, Object body) {
+        return Payload.builder()
+                .command(command)
+                .body(body)
+                .build();
+    }
+
     @Builder
     public Payload(Command command, Object body) {
         this.command = command;

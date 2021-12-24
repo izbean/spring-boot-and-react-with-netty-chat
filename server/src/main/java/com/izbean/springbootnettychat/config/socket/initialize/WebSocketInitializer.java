@@ -33,7 +33,7 @@ public class WebSocketInitializer extends ChannelInitializer<SocketChannel> {
     private static final CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin().allowNullOrigin().allowCredentials().build();
 
     @Override
-    protected void initChannel(SocketChannel ch) throws Exception {
+    protected void initChannel(SocketChannel ch) {
         ChannelPipeline pipeline = ch.pipeline();
 
         pipeline.addLast(new LoggingHandler(LogLevel.DEBUG))

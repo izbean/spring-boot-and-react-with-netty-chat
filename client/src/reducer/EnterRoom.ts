@@ -1,5 +1,5 @@
 export interface EnterRoom {
     id: string,
-    name: string,
-    attendees: [string]
+    name: string | null,
+    attendees: [string] | null
 }

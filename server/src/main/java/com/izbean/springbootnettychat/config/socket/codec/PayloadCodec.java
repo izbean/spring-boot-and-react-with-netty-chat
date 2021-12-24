@@ -18,12 +18,12 @@ import java.util.List;
 public class PayloadCodec extends MessageToMessageCodec<TextWebSocketFrame, Payload> {
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, Payload payload, List<Object> out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, Payload payload, List<Object> out) {
         out.add(new TextWebSocketFrame(MapperUtils.writeValueAsStringOrThrow(payload)));
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, TextWebSocketFrame frame, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, TextWebSocketFrame frame, List<Object> out) {
         out.add(Payload.parse(frame.content().toString(Charset.defaultCharset())));
     }
 

@@ -7,7 +7,7 @@ import com.izbean.springbootnettychat.config.socket.provider.NicknameProvider;
 import com.izbean.springbootnettychat.dto.JoinRoomDto;
 import com.izbean.springbootnettychat.dto.RoomDto;
 import com.izbean.springbootnettychat.service.RoomService;
-import com.izbean.springbootnettychat.util.MapperUtils;
+import com.izbean.springbootnettychat.util.ChannelUtils;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -16,6 +16,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Component
@@ -33,33 +34,32 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
 
     @Override
     public void channelInactive(final ChannelHandlerContext ctx) {
+        hasActiveRoomLeft(ctx);
         channels.remove(ctx.channel());
         channels.writeAndFlush(message(Command.LEFT, Message.left(nickname(ctx))));
         nicknameProvider.release(nickname(ctx));
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Payload payload) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Payload payload) {
         log.debug("channelRead0 Payload: {}", payload);
+
+        Channel channel = ctx.channel();
 
         switch (payload.getCommand()) {
             case INIT:
                 ctx.writeAndFlush(message(Command.INIT, roomService.getRooms()));
                 break;
             case HELLO:
-                hello(ctx.channel());
+                hello(channel);
                 RoomDto room = roomService.createRoom(nickname(ctx) + "의 채팅방");
                 channels.writeAndFlush(message(Command.CREATE_ROOM, room));
-                ctx.channel().writeAndFlush(message(Command.ENTER_ROOM, roomService.joinRoom(ctx, room.getId())));
+                channel.writeAndFlush(message(Command.ENTER_ROOM, roomService.joinRoom(ctx, room.getId())));
                 channels.writeAndFlush(message(Command.RELOAD_ROOM_ATTENDEE_COUNT, roomService.getRoom(room.getId())));
                 break;
             case SEND:
                 Message send = Payload.bodyOfClass(payload, Message.class);
                 roomService.sendMessageForRoom(ctx, send.getRoomId(), send.getMessage());
-                break;
-            case QUIT:
-                ctx.writeAndFlush(message(Command.BYE, Message.left(nickname(ctx))));
-                ctx.close();
                 break;
             case NICK:
                 changeNickname(ctx, payload);
@@ -71,8 +71,11 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
                 ctx.writeAndFlush(message(Command.RELOAD_ROOM_LIST, roomService.getRooms()));
                 break;
             case ENTER_ROOM:
+                String activeRoomId = hasActiveRoomLeft(ctx);
+
                 JoinRoomDto joinRoomDto = roomService.joinRoom(ctx, Payload.bodyOfClass(payload, RoomDto.class).getId());
-                ctx.channel().writeAndFlush(message(Command.RELOAD_ROOM_ATTENDEE_COUNT, roomService.getRoom(joinRoomDto.getId())));
+                channel.writeAndFlush(message(Command.ENTER_ROOM, joinRoomDto));
+                synchronizeCountChatRoomAttendee(activeRoomId, joinRoomDto.getId());
                 break;
             default:
                 throw new IllegalArgumentException(String.format("Unsupported command. [%s]", payload.getCommand()));
@@ -80,7 +83,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
     }
 
@@ -107,10 +110,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
     }
 
     private Payload message(Command command, Object body) {
-        return Payload.builder()
-                .command(command)
-                .body(body)
-                .build();
+        return Payload.message(command, body);
     }
 
     private void bindNickname(Channel c, String nickname) {
@@ -126,15 +126,32 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
     }
 
     private void changeNickname(ChannelHandlerContext ctx, Payload payload) {
-        String newNick = ((Message) payload.getBody()).getMessage();
+        String newNick = Payload.bodyOfClass(payload, Message.class).getMessage();
         String prev = nickname(ctx);
         if (!newNick.equals(prev) && nicknameProvider.available(newNick)) {
             nicknameProvider.release(prev).reserve(newNick);
             bindNickname(ctx.channel(), newNick);
-            channels.writeAndFlush(message(Command.NICK, Message.nick(prev, newNick)));
+            roomService.changeNickname(ctx, prev);
         } else {
             ctx.writeAndFlush(message(Command.ERROR, Message.error("couldn't change.")));
         }
+    }
+
+    private String hasActiveRoomLeft(ChannelHandlerContext ctx) {
+        String activeRoomId = ChannelUtils.getActiveRoomId(ctx);
+
+        if (StringUtils.hasText(activeRoomId))
+            roomService.leftRoom(ctx, activeRoomId);
+
+        return activeRoomId;
+    }
+
+    private void synchronizeCountChatRoomAttendee(String... roomIds) {
+        for (String roomId : roomIds)
+            if (StringUtils.hasText(roomId))
+                channels.write(message(Command.RELOAD_ROOM_ATTENDEE_COUNT, roomService.getRoom(roomId)));
+
+        channels.flush();
     }
 
 }

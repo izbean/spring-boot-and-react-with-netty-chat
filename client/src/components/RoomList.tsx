@@ -1,18 +1,26 @@
-import React, {useState, useContext} from 'react';
+import { useContext } from 'react';
 import { Badge, ListGroup, ListGroupItem } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
+import { Payload, PayloadCommand } from '../reducer/ChatMessage';
+import { EnterRoom } from '../reducer/EnterRoom';
 import { RootState } from '../reducer/reducers';
 import { Room } from '../reducer/Room';
+import { WebSocketContext } from '../websocket/WebSocketProvider';
 
 const RoomList = () => {
     const rooms = useSelector((state: RootState) => state.roomReducer?.rooms);
     const activeRoomId = useSelector((state: RootState) => state.chatReducer?.activeRoomId);
+    const ws = useContext(WebSocketContext);
 
-    console.log(rooms);
-    console.log(activeRoomId);
+    const onClickHandle = (e: any) => {
+        const payload = {
+            command: PayloadCommand.ENTER_ROOM,
+            body: {
+                id: e.target.getAttribute("data-room-id")
+            } as EnterRoom
+        } as Payload;
 
-    const onClick = () => {
-        alert("키키");
+        ws.current.send(JSON.stringify(payload));
     }
 
     return (
@@ -23,7 +31,8 @@ const RoomList = () => {
                         <ListGroupItem as="li" 
                         className="d-flex justify-content-between align-items-start"
                         action
-                        onClick={onClick}
+                        onClick={onClickHandle}
+                        data-room-id={room.id}
                         {...activeRoomId == room.id && {"active": true}}>
                             {room.name}
                             <Badge pill>
