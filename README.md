@@ -10,7 +10,7 @@
 | 단계 | 변경점 |
 | ------ | ------ |
 | [step1][step1] | 기본 채팅 기능 작성 |
-| [step2][step2] | ChatRoom 기능 추가[WIP] |
+| [step2][step2] | ChatRoom 기능 추가 |
 
 
 ## Preview
