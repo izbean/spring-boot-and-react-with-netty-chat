@@ -1,6 +1,5 @@
 package com.izbean.springbootnettychat.repository;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.springframework.stereotype.Repository;
 

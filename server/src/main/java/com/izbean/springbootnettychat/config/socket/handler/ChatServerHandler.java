@@ -65,7 +65,8 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
                 changeNickname(ctx, payload);
                 break;
             case CREATE_ROOM:
-                channels.writeAndFlush(message(Command.CREATE_ROOM, roomService.createRoom(Payload.bodyOfClass(payload, RoomDto.class).getName())));
+                RoomDto createdRoom = roomService.createRoom(Payload.bodyOfClass(payload, RoomDto.class).getName());
+                channels.writeAndFlush(message(Command.CREATE_ROOM, createdRoom));
                 break;
             case RELOAD_ROOM_LIST:
                 ctx.writeAndFlush(message(Command.RELOAD_ROOM_LIST, roomService.getRooms()));
@@ -73,7 +74,8 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<Payload> {
             case ENTER_ROOM:
                 String activeRoomId = hasActiveRoomLeft(ctx);
 
-                JoinRoomDto joinRoomDto = roomService.joinRoom(ctx, Payload.bodyOfClass(payload, RoomDto.class).getId());
+                RoomDto roomDto = Payload.bodyOfClass(payload, RoomDto.class);
+                JoinRoomDto joinRoomDto = roomService.joinRoom(ctx, roomDto.getId());
                 channel.writeAndFlush(message(Command.ENTER_ROOM, joinRoomDto));
                 synchronizeCountChatRoomAttendee(activeRoomId, joinRoomDto.getId());
                 break;
